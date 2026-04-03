@@ -1,6 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 
-const API_BASE = process.env.EXPO_PUBLIC_BACKEND_URL;
+const API_BASE =
+  process.env.EXPO_PUBLIC_BACKEND_URL ||
+  Constants.expoConfig?.extra?.backendUrl ||
+  'https://wedding-task-hub-1.preview.emergentagent.com';
 
 interface RequestOptions {
   method?: string;

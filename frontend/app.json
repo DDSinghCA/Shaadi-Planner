@@ -53,6 +53,7 @@
       "typedRoutes": true
     },
     "extra": {
+      "backendUrl": "https://wedding-task-hub-1.preview.emergentagent.com",
       "eas": {
         "projectId": "your-eas-project-id"
       }
