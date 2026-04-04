@@ -1,0 +1,134 @@
+{
+  "theme": "Light",
+  "archetype": "1 (Organic & Earthy) blended with Functional Clarity",
+  "design_philosophy": "Modern minimal with a subtle Indian touch. High accessibility for non-technical family members. Generous touch targets, high-contrast text, clear explicit labeling over abstract icons.",
+  "colors": {
+    "background": {
+      "primary": "#FAF9F6",
+      "secondary": "#F3EFE6",
+      "card": "#FFFFFF"
+    },
+    "text": {
+      "primary": "#1A1A1A",
+      "secondary": "#4A4A4A",
+      "inverse": "#FFFFFF",
+      "accent": "#7A1A2A"
+    },
+    "brand": {
+      "maroon": "#7A1A2A",
+      "maroon_light": "#962C3F",
+      "gold": "#C19B5E",
+      "gold_light": "#D8B884",
+      "gold_muted": "#E5D9C5"
+    },
+    "ui": {
+      "border": "#E5E0D8",
+      "divider": "#EFEBE1",
+      "success": "#2D6A4F",
+      "warning": "#C19B5E",
+      "error": "#962C3F"
+    }
+  },
+  "typography": {
+    "font_family": {
+      "heading": "Playfair Display, serif",
+      "body": "Outfit, sans-serif"
+    },
+    "sizes": {
+      "h1": "text-3xl md:text-4xl tracking-tight leading-tight",
+      "h2": "text-2xl md:text-3xl tracking-tight",
+      "h3": "text-xl md:text-2xl",
+      "body_large": "text-lg",
+      "body": "text-base",
+      "small": "text-sm",
+      "label": "text-xs uppercase tracking-wider"
+    },
+    "rules": [
+      "Headings should use Playfair Display to inject a premium, traditional wedding feel without heavy decor.",
+      "Body text must use Outfit for maximum legibility for older family members.",
+      "Never use font weights below 400 for text smaller than 18px.",
+      "Buttons and inputs must use body font, not heading font."
+    ]
+  },
+  "spacing_and_layout": {
+    "container_padding": "p-4 md:p-6",
+    "section_gap": "gap-6 md:gap-8",
+    "item_gap": "gap-3 md:gap-4",
+    "border_radius": {
+      "button": "rounded-full",
+      "card": "rounded-2xl",
+      "input": "rounded-xl"
+    },
+    "rules": [
+      "Generous Spacing: Leave ample breathing room. Use margin/padding 1.5x larger than standard apps.",
+      "Avoid complex grids. Use simple, stack-based layouts (vertical scroll) which are easier for non-technical users to navigate."
+    ]
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#7A1A2A] text-white rounded-full h-14 flex items-center justify-center font-medium text-lg shadow-sm",
+      "secondary": "bg-[#F3EFE6] text-[#7A1A2A] rounded-full h-14 flex items-center justify-center font-medium text-lg border border-[#E5E0D8]",
+      "rules": [
+        "Minimum tap target height must be 48px, ideally 56px (h-14).",
+        "Use explicit text labels (e.g., 'Add New Guest') instead of just a '+' icon.",
+        "Add data-testid attributes to all interactive elements."
+      ]
+    },
+    "cards": {
+      "base": "bg-white rounded-2xl p-5 border border-[#E5E0D8] shadow-sm",
+      "rules": [
+        "Cards should not have aggressive drop shadows. Keep it flat and clean.",
+        "Use muted gold (#C19B5E) for subtle highlights on cards, like a left border or small icon background."
+      ]
+    },
+    "navigation": {
+      "type": "Bottom Tab Navigation",
+      "active_state": "text-[#7A1A2A] font-semibold",
+      "inactive_state": "text-[#4A4A4A]",
+      "rules": [
+        "Include text labels under all icons in the bottom tab bar.",
+        "Keep the tab bar background Ivory (#FCFAEF) with a subtle top border."
+      ]
+    },
+    "inputs": {
+      "base": "bg-white border border-[#E5E0D8] rounded-xl px-4 py-3 text-base text-[#1A1A1A] h-14",
+      "rules": [
+        "Always show visible labels above inputs. Do not rely solely on placeholders."
+      ]
+    }
+  },
+  "accessibility": {
+    "contrast": "Ensure all text against the off-white background passes WCAG AA (minimum 4.5:1).",
+    "touch_targets": "All tappable areas must be at least 48x48 points.",
+    "visual_hierarchy": "Use bold font weights and larger sizes for primary information (e.g., Task Name). Use color strictly as a secondary indicator, not the only indicator of state.",
+    "testing": "All interactive and key informational elements MUST include a data-testid attribute (e.g., data-testid='login-button', data-testid='task-item-1')."
+  },
+  "image_urls": [
+    {
+      "category": "background",
+      "description": "Subtle Indian wedding motifs, off-white background with maroon and gold line art for the Login Screen.",
+      "url": "https://static.prod-images.emergentagent.com/jobs/c539db45-8380-425c-a009-a3b663f5c7ae/images/79668051a28fa00436fe5fc67c31c583383d56e195963aa4a182bef9deb08162.png"
+    },
+    {
+      "category": "empty_state_tasks",
+      "description": "3D icon of a beautiful wedding diary/task list for the 'My Tasks' empty state.",
+      "url": "https://static.prod-images.emergentagent.com/jobs/c539db45-8380-425c-a009-a3b663f5c7ae/images/2906624d13c6fb436fd6a6956da45cda4468a21a8163682ac9bb0275e6a23535.png"
+    },
+    {
+      "category": "empty_state_guests",
+      "description": "3D icon of an elegant envelope/guest list for the 'Guests' empty state.",
+      "url": "https://static.prod-images.emergentagent.com/jobs/c539db45-8380-425c-a009-a3b663f5c7ae/images/4ce680d87f19e2205c978adcee0d84b9601cf88ec41097cd32a6e82258138c17.png"
+    }
+  ],
+  "instructions_to_main_agent": [
+    "This is a React Native Expo application. Adapt standard Tailwind CSS principles to NativeWind or standard StyleSheet.",
+    "Ensure all components are built using .js files (not .tsx).",
+    "The default screen after successful login MUST be 'My Tasks'.",
+    "Apply the deep maroon (#7A1A2A) as the primary action color (buttons, active tabs) and muted gold (#C19B5E) for secondary accents and warnings.",
+    "Keep navigation extremely simple. Avoid deep nesting. A bottom tab bar with Dashboard, Tasks, Guests, Budget, and Itinerary is ideal.",
+    "Do not use generic placeholder images. Use the provided image URLs for the login background and empty states.",
+    "For user roles (Admin/Contributor/Viewer), ensure UI conditionally renders elements (e.g., hide 'Add Guest' button for Viewers).",
+    "Prioritize large text and large buttons. Assume the user is a non-technical family member in their 50s/60s.",
+    "Every touchable element and key view MUST have a data-testid attribute in kebab-case."
+  ]
+}
