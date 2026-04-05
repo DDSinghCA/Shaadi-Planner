@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.shaadiplanner",
+      "bundleIdentifier": "com.caddsingh.shaadiplanner",
       "buildNumber": "1",
       "infoPlist": {
         "CFBundleDisplayName": "Shaadi Planner",
@@ -20,7 +20,7 @@
       }
     },
     "android": {
-      "package": "com.yourcompany.shaadiplanner",
+      "package": "com.caddsingh.shaadiplanner",
       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -28,6 +28,8 @@
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
         "INTERNET",
         "ACCESS_NETWORK_STATE"
       ]
@@ -54,16 +56,16 @@
     },
     "extra": {
       "backendUrl": "https://shaadi-planner.onrender.com",
+      "router": {},
       "eas": {
-        "projectId": "your-eas-project-id"
+        "projectId": "9d5ad06a-5fea-4ea3-b482-78358c1d073b"
       }
     },
-    "owner": "your-expo-username",
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/your-eas-project-id"
+      "url": "https://u.expo.dev/9d5ad06a-5fea-4ea3-b482-78358c1d073b"
     }
   }
 }

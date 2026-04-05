@@ -1,10 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
-const API_BASE =
-  process.env.EXPO_PUBLIC_BACKEND_URL ||
-  Constants.expoConfig?.extra?.backendUrl ||
-  'https://shaadi-planner.onrender.com';
+const API_BASE = "https://shaadi-planner.onrender.com";
 
 interface RequestOptions {
   method?: string;
@@ -57,6 +54,7 @@ class ApiClient {
   async request(endpoint: string, options: RequestOptions = {}): Promise<any> {
     const { method = 'GET', body, headers = {} } = options;
     const url = `${API_BASE}/api${endpoint}`;
+    console.log("API CALL:", url);
     const reqHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
       ...headers,
