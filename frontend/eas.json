@@ -15,7 +15,7 @@
         "simulator": true
       },
       "env": {
-        "EXPO_PUBLIC_BACKEND_URL": "https://wedding-task-hub-1.preview.emergentagent.com"
+        "EXPO_PUBLIC_BACKEND_URL": "https://shaadi-planner.onrender.com"
       }
     },
     "preview": {
@@ -27,7 +27,7 @@
         "distribution": "internal"
       },
       "env": {
-        "EXPO_PUBLIC_BACKEND_URL": "https://wedding-task-hub-1.preview.emergentagent.com"
+        "EXPO_PUBLIC_BACKEND_URL": "https://shaadi-planner.onrender.com"
       },
       "channel": "preview"
     },
@@ -39,7 +39,7 @@
         "distribution": "store"
       },
       "env": {
-        "EXPO_PUBLIC_BACKEND_URL": "https://wedding-task-hub-1.preview.emergentagent.com"
+        "EXPO_PUBLIC_BACKEND_URL": "https://shaadi-planner.onrender.com"
       },
       "channel": "production",
       "autoIncrement": true
