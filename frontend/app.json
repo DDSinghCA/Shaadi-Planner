@@ -55,7 +55,7 @@
       "typedRoutes": true
     },
     "extra": {
-      "backendUrl": "https://wedding-task-hub-1.preview.emergentagent.com",
+      "backendUrl": "https://shaadi-planner.onrender.com",
       "router": {},
       "eas": {
         "projectId": "9d5ad06a-5fea-4ea3-b482-78358c1d073b"

@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
-const API_BASE = "https://wedding-task-hub-1.preview.emergentagent.com";
+const API_BASE = "https://shaadi-planner.onrender.com";
 
 interface RequestOptions {
   method?: string;
