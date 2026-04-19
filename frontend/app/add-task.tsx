@@ -6,8 +6,10 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/src/context/AuthContext';
 import { api } from '@/src/utils/api';
+import { formatDisplayDate, toISODate, parseISODate } from '@/src/utils/dates';
 import { Colors, Spacing, FontSizes, BorderRadius } from '@/src/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 export default function AddTaskScreen() {
   const router = useRouter();
@@ -22,6 +24,7 @@ export default function AddTaskScreen() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchingTask, setFetchingTask] = useState(isEdit);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     if (user?.role === 'admin') {
@@ -44,14 +47,14 @@ export default function AddTaskScreen() {
     }
   }, [isEdit, params.taskId]);
 
+  const handleDateConfirm = (date: Date) => {
+    setDeadline(toISODate(date));
+    setShowDatePicker(false);
+  };
+
   const handleSave = async () => {
     if (!title.trim()) {
       Alert.alert('Required', 'Please enter a task title');
-      return;
-    }
-    // Validate date format if provided
-    if (deadline && !/^\d{4}-\d{2}-\d{2}$/.test(deadline)) {
-      Alert.alert('Invalid Date', 'Please use YYYY-MM-DD format');
       return;
     }
     setLoading(true);
@@ -87,7 +90,6 @@ export default function AddTaskScreen() {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
         <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-          {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity testID="back-btn" onPress={() => router.back()} style={styles.backBtn}>
               <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
@@ -111,13 +113,27 @@ export default function AddTaskScreen() {
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Deadline</Text>
-              <TextInput
-                testID="task-deadline-input"
-                style={styles.input}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor="#999"
-                value={deadline}
-                onChangeText={setDeadline}
+              <TouchableOpacity
+                testID="task-deadline-picker"
+                style={styles.datePickerBtn}
+                onPress={() => setShowDatePicker(true)}
+              >
+                <Ionicons name="calendar-outline" size={20} color={Colors.brand.maroon} />
+                <Text style={[styles.datePickerText, !deadline && styles.placeholder]}>
+                  {deadline ? formatDisplayDate(deadline) : 'Select date'}
+                </Text>
+                {deadline ? (
+                  <TouchableOpacity onPress={() => setDeadline('')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    <Ionicons name="close-circle" size={20} color={Colors.text.secondary} />
+                  </TouchableOpacity>
+                ) : null}
+              </TouchableOpacity>
+              <DateTimePickerModal
+                isVisible={showDatePicker}
+                mode="date"
+                date={deadline ? parseISODate(deadline) : new Date()}
+                onConfirm={handleDateConfirm}
+                onCancel={() => setShowDatePicker(false)}
               />
             </View>
 
@@ -195,6 +211,13 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.md, color: Colors.text.primary,
   },
   textArea: { height: 120, paddingTop: Spacing.md },
+  datePickerBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
+    backgroundColor: Colors.background.card, borderWidth: 1, borderColor: Colors.ui.border,
+    borderRadius: BorderRadius.lg, height: 56, paddingHorizontal: Spacing.lg,
+  },
+  datePickerText: { flex: 1, fontSize: FontSizes.md, color: Colors.text.primary },
+  placeholder: { color: '#999' },
   userChip: {
     paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full, backgroundColor: Colors.background.secondary,

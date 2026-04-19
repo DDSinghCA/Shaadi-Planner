@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
-  RefreshControl, ActivityIndicator, SafeAreaView, Alert
+  RefreshControl, ActivityIndicator, SafeAreaView, Alert, Linking
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useAuth } from '@/src/context/AuthContext';
 import { api } from '@/src/utils/api';
+import { formatDisplayDate, openGoogleMaps } from '@/src/utils/dates';
 import { Colors, Spacing, FontSizes, BorderRadius } from '@/src/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -48,6 +49,13 @@ export default function ItineraryScreen() {
         }
       }
     ]);
+  };
+
+  const handleLocationPress = (location: string) => {
+    const url = openGoogleMaps(location);
+    Linking.openURL(url).catch(() => {
+      Alert.alert('Error', 'Could not open Google Maps');
+    });
   };
 
   const isPast = (date: string) => {
@@ -122,9 +130,7 @@ export default function ItineraryScreen() {
                       </View>
                     )}
                     <Text style={[styles.eventDate, past && styles.pastText]}>
-                      {new Date(event.date + 'T00:00:00').toLocaleDateString('en-IN', {
-                        weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'
-                      })}
+                      {formatDisplayDate(event.date)}
                     </Text>
                     <Text style={[styles.eventName, past && styles.pastText]}>{event.name}</Text>
                     {event.time && (
@@ -134,10 +140,15 @@ export default function ItineraryScreen() {
                       </View>
                     )}
                     {event.location && (
-                      <View style={styles.infoRow}>
-                        <Ionicons name="location-outline" size={16} color={past ? Colors.text.secondary : Colors.brand.gold} />
-                        <Text style={[styles.infoText, past && styles.pastText]}>{event.location}</Text>
-                      </View>
+                      <TouchableOpacity
+                        testID={`event-location-${idx}`}
+                        style={styles.locationRow}
+                        onPress={() => handleLocationPress(event.location)}
+                      >
+                        <Ionicons name="location" size={16} color={Colors.brand.gold} />
+                        <Text style={[styles.locationText, past && styles.pastText]}>{event.location}</Text>
+                        <Ionicons name="open-outline" size={14} color={Colors.brand.maroon} />
+                      </TouchableOpacity>
                     )}
                     {event.notes && (
                       <Text style={[styles.notes, past && styles.pastText]}>{event.notes}</Text>
@@ -217,6 +228,12 @@ const styles = StyleSheet.create({
   pastText: { color: Colors.text.secondary },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, marginBottom: 4 },
   infoText: { fontSize: FontSizes.sm, color: Colors.text.primary },
+  locationRow: {
+    flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, marginBottom: 4,
+    paddingVertical: 4, paddingHorizontal: Spacing.sm,
+    backgroundColor: Colors.brand.goldMuted + '60', borderRadius: BorderRadius.sm,
+  },
+  locationText: { flex: 1, fontSize: FontSizes.sm, color: Colors.brand.maroon, fontWeight: '500' },
   notes: { fontSize: FontSizes.sm, color: Colors.text.secondary, marginTop: Spacing.sm, fontStyle: 'italic' },
   transportBox: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,

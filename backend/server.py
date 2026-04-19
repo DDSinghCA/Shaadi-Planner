@@ -127,6 +127,9 @@ class GuestCreate(BaseModel):
     assigned_handler: Optional[str] = None
     phone: Optional[str] = None
     notes: Optional[str] = None
+    status: Optional[str] = None
+    room_required: Optional[bool] = None
+    event_ids: Optional[List[str]] = None
 
 class GuestUpdate(BaseModel):
     name: Optional[str] = None
@@ -135,6 +138,9 @@ class GuestUpdate(BaseModel):
     assigned_handler: Optional[str] = None
     phone: Optional[str] = None
     notes: Optional[str] = None
+    status: Optional[str] = None
+    room_required: Optional[bool] = None
+    event_ids: Optional[List[str]] = None
 
 class BudgetItemCreate(BaseModel):
     category: str
@@ -407,7 +413,13 @@ async def get_guests(side: Optional[str] = None, group: Optional[str] = None, us
 
 @api_router.put("/guests/{guest_id}")
 async def update_guest(guest_id: str, req: GuestUpdate, user: dict = Depends(require_role("admin", "contributor"))):
-    update_data = {k: v for k, v in req.dict().items() if v is not None}
+    update_data = {}
+    req_dict = req.dict()
+    for k, v in req_dict.items():
+        if v is not None:
+            update_data[k] = v
+        elif k == "event_ids" and req.event_ids is not None:
+            update_data[k] = v
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields to update")
     result = await db.guests.update_one({"_id": ObjectId(guest_id)}, {"$set": update_data})

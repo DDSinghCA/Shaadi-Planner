@@ -5,8 +5,10 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { api } from '@/src/utils/api';
+import { formatDisplayDate, toISODate, parseISODate } from '@/src/utils/dates';
 import { Colors, Spacing, FontSizes, BorderRadius } from '@/src/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 export default function AddEventScreen() {
   const router = useRouter();
@@ -21,6 +23,7 @@ export default function AddEventScreen() {
   const [transportNotes, setTransportNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEdit);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     if (isEdit && params.eventId) {
@@ -39,19 +42,24 @@ export default function AddEventScreen() {
     }
   }, [isEdit, params.eventId]);
 
+  const handleDateConfirm = (selectedDate: Date) => {
+    setDate(toISODate(selectedDate));
+    setShowDatePicker(false);
+  };
+
   const handleSave = async () => {
     if (!name.trim()) {
       Alert.alert('Required', 'Please enter event name');
       return;
     }
-    if (!date.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      Alert.alert('Required', 'Please enter date in YYYY-MM-DD format');
+    if (!date) {
+      Alert.alert('Required', 'Please select a date');
       return;
     }
     setLoading(true);
     try {
       const payload = {
-        name: name.trim(), date: date.trim(),
+        name: name.trim(), date: date,
         time: time || null, location: location || null,
         notes: notes || null, transport_notes: transportNotes || null,
       };
@@ -104,13 +112,22 @@ export default function AddEventScreen() {
             <View style={styles.row}>
               <View style={[styles.inputGroup, { flex: 1 }]}>
                 <Text style={styles.label}>Date *</Text>
-                <TextInput
-                  testID="event-date-input"
-                  style={styles.input}
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor="#999"
-                  value={date}
-                  onChangeText={setDate}
+                <TouchableOpacity
+                  testID="event-date-picker"
+                  style={styles.datePickerBtn}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Ionicons name="calendar-outline" size={18} color={Colors.brand.maroon} />
+                  <Text style={[styles.datePickerText, !date && styles.placeholder]}>
+                    {date ? formatDisplayDate(date) : 'Select'}
+                  </Text>
+                </TouchableOpacity>
+                <DateTimePickerModal
+                  isVisible={showDatePicker}
+                  mode="date"
+                  date={date ? parseISODate(date) : new Date()}
+                  onConfirm={handleDateConfirm}
+                  onCancel={() => setShowDatePicker(false)}
                 />
               </View>
               <View style={[styles.inputGroup, { flex: 1 }]}>
@@ -136,6 +153,7 @@ export default function AddEventScreen() {
                 value={location}
                 onChangeText={setLocation}
               />
+              <Text style={styles.hint}>Tip: Enter a full address for Google Maps link in itinerary</Text>
             </View>
 
             <View style={styles.inputGroup}>
@@ -209,6 +227,14 @@ const styles = StyleSheet.create({
   },
   textArea: { height: 90, paddingTop: Spacing.md },
   row: { flexDirection: 'row', gap: Spacing.md },
+  datePickerBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
+    backgroundColor: Colors.background.card, borderWidth: 1, borderColor: Colors.ui.border,
+    borderRadius: BorderRadius.lg, height: 56, paddingHorizontal: Spacing.lg,
+  },
+  datePickerText: { flex: 1, fontSize: FontSizes.md, color: Colors.text.primary },
+  placeholder: { color: '#999' },
+  hint: { fontSize: FontSizes.xs, color: Colors.text.secondary, marginLeft: Spacing.xs, fontStyle: 'italic' },
   saveBtn: {
     backgroundColor: Colors.brand.maroon, height: 56,
     borderRadius: BorderRadius.full, justifyContent: 'center', alignItems: 'center', marginTop: Spacing.md,

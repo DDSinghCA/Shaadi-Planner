@@ -6,6 +6,7 @@ import {
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useAuth } from '@/src/context/AuthContext';
 import { api } from '@/src/utils/api';
+import { formatDisplayDate, isOverdue, isToday } from '@/src/utils/dates';
 import { Colors, Spacing, FontSizes, BorderRadius } from '@/src/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -37,17 +38,6 @@ export default function DashboardScreen() {
   const onRefresh = () => {
     setRefreshing(true);
     fetchDashboard();
-  };
-
-  const isOverdue = (deadline: string) => {
-    if (!deadline) return false;
-    return new Date(deadline) < new Date(new Date().toDateString());
-  };
-
-  const isToday = (deadline: string) => {
-    if (!deadline) return false;
-    const today = new Date().toISOString().split('T')[0];
-    return deadline === today;
   };
 
   if (loading) {
@@ -170,7 +160,7 @@ export default function DashboardScreen() {
                         isOverdue(task.deadline) && styles.overdue
                       ]}>
                         {isOverdue(task.deadline) ? 'Overdue: ' : isToday(task.deadline) ? 'Due today: ' : 'Due: '}
-                        {task.deadline}
+                        {formatDisplayDate(task.deadline)}
                       </Text>
                     )}
                   </View>

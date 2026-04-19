@@ -12,6 +12,12 @@ import { Ionicons } from '@expo/vector-icons';
 const SIDES = ['All', 'Bride', 'Groom'];
 const GROUPS = ['All', 'Family', 'Friends', 'VIP'];
 
+const STATUS_CONFIG: Record<string, { color: string; icon: string; label: string }> = {
+  invited: { color: Colors.brand.gold, icon: 'mail-outline', label: 'Invited' },
+  confirmed: { color: Colors.ui.success, icon: 'checkmark-circle', label: 'Confirmed' },
+  declined: { color: Colors.ui.error, icon: 'close-circle', label: 'Declined' },
+};
+
 export default function GuestsScreen() {
   const { user } = useAuth();
   const router = useRouter();
@@ -154,6 +160,20 @@ export default function GuestsScreen() {
                           {guest.group?.charAt(0)?.toUpperCase() + guest.group?.slice(1)}
                         </Text>
                       </View>
+                      {guest.status && STATUS_CONFIG[guest.status] && (
+                        <View style={[styles.tag, { backgroundColor: STATUS_CONFIG[guest.status].color + '18' }]}>
+                          <Ionicons name={STATUS_CONFIG[guest.status].icon as any} size={12} color={STATUS_CONFIG[guest.status].color} />
+                          <Text style={[styles.tagText, { color: STATUS_CONFIG[guest.status].color, marginLeft: 2 }]}>
+                            {STATUS_CONFIG[guest.status].label}
+                          </Text>
+                        </View>
+                      )}
+                      {guest.room_required && (
+                        <View style={[styles.tag, { backgroundColor: Colors.brand.goldMuted }]}>
+                          <Ionicons name="bed-outline" size={12} color={Colors.brand.gold} />
+                          <Text style={[styles.tagText, { color: Colors.brand.gold, marginLeft: 2 }]}>Room</Text>
+                        </View>
+                      )}
                     </View>
                   </View>
                   {user?.role === 'admin' && (
@@ -216,7 +236,7 @@ const styles = StyleSheet.create({
   avatarText: { fontSize: FontSizes.lg, fontWeight: '700' },
   guestInfo: { flex: 1 },
   guestName: { fontSize: FontSizes.md, fontWeight: '600', color: Colors.text.primary },
-  guestTags: { flexDirection: 'row', gap: Spacing.xs, marginTop: 4 },
+  guestTags: { flexDirection: 'row', gap: Spacing.xs, marginTop: 4, flexWrap: 'wrap' },
   tag: { paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: BorderRadius.sm },
   tagText: { fontSize: FontSizes.xs, fontWeight: '600' },
   tagTextMuted: { fontSize: FontSizes.xs, color: Colors.text.secondary },

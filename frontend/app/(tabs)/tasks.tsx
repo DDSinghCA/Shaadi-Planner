@@ -6,6 +6,7 @@ import {
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useAuth } from '@/src/context/AuthContext';
 import { api } from '@/src/utils/api';
+import { formatDisplayDate, isOverdue, isToday } from '@/src/utils/dates';
 import { Colors, Spacing, FontSizes, BorderRadius } from '@/src/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -62,16 +63,6 @@ export default function TasksScreen() {
         }
       }
     ]);
-  };
-
-  const isOverdue = (deadline: string) => {
-    if (!deadline) return false;
-    return new Date(deadline) < new Date(new Date().toDateString());
-  };
-
-  const isToday = (deadline: string) => {
-    if (!deadline) return false;
-    return deadline === new Date().toISOString().split('T')[0];
   };
 
   const pendingTasks = tasks.filter(t => t.status === 'pending');
@@ -161,7 +152,7 @@ export default function TasksScreen() {
                               isToday(task.deadline) && styles.today,
                             ]}>
                               {isOverdue(task.deadline) ? 'Overdue: ' : isToday(task.deadline) ? 'Today: ' : ''}
-                              {task.deadline}
+                              {formatDisplayDate(task.deadline)}
                             </Text>
                           </View>
                         )}
