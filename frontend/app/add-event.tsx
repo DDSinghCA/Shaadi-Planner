@@ -22,6 +22,7 @@ export default function AddEventScreen() {
   const [notes, setNotes] = useState('');
   const [transportNotes, setTransportNotes] = useState('');
   const [mapsLink, setMapsLink] = useState('');
+  const [city, setCity] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEdit);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -38,6 +39,7 @@ export default function AddEventScreen() {
           setNotes(event.notes || '');
           setTransportNotes(event.transport_notes || '');
           setMapsLink(event.maps_link || '');
+          setCity(event.city || '');
         }
         setFetching(false);
       }).catch(() => setFetching(false));
@@ -64,7 +66,7 @@ export default function AddEventScreen() {
         name: name.trim(), date: date,
         time: time || null, location: location || null,
         notes: notes || null, transport_notes: transportNotes || null,
-        maps_link: mapsLink || null,
+        maps_link: mapsLink || null, city: city || null,
       };
       if (isEdit && params.eventId) {
         await api.put(`/events/${params.eventId}`, payload);

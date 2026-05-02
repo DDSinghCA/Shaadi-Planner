@@ -150,6 +150,12 @@ export default function ItineraryScreen() {
                         <Ionicons name="open-outline" size={14} color={Colors.brand.maroon} />
                       </TouchableOpacity>
                     )}
+                    {event.city ? (
+                      <View style={styles.cityRow} testID={`event-city-${idx}`}>
+                        <Ionicons name="business-outline" size={14} color={past ? Colors.text.secondary : Colors.brand.maroon} />
+                        <Text style={[styles.cityText, past && styles.pastText]}>{event.city}</Text>
+                      </View>
+                    ) : null}
                     {event.notes && (
                       <Text style={[styles.notes, past && styles.pastText]}>{event.notes}</Text>
                     )}
@@ -234,6 +240,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.brand.goldMuted + '60', borderRadius: BorderRadius.sm,
   },
   locationText: { flex: 1, fontSize: FontSizes.sm, color: Colors.brand.maroon, fontWeight: '500' },
+  cityRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, marginBottom: 4, marginTop: 2 },
+  cityText: { fontSize: FontSizes.sm, color: Colors.text.primary, fontWeight: '500' },
   notes: { fontSize: FontSizes.sm, color: Colors.text.secondary, marginTop: Spacing.sm, fontStyle: 'italic' },
   transportBox: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,

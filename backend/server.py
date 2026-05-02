@@ -168,6 +168,7 @@ class EventCreate(BaseModel):
     notes: Optional[str] = None
     transport_notes: Optional[str] = None
     maps_link: Optional[str] = None
+    city: Optional[str] = None
 
 class EventUpdate(BaseModel):
     name: Optional[str] = None
@@ -177,6 +178,7 @@ class EventUpdate(BaseModel):
     notes: Optional[str] = None
     transport_notes: Optional[str] = None
     maps_link: Optional[str] = None
+    city: Optional[str] = None
 
 # ─── Helper: serialize doc ───
 def serialize_doc(doc):
@@ -506,6 +508,40 @@ async def delete_budget_item(item_id: str, user: dict = Depends(require_role("ad
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Budget item not found")
     return {"message": "Budget item deleted"}
+
+# ─── BUDGET SUMMARY BY EVENT ───
+@api_router.get("/budget/by-event")
+async def get_budget_by_event(user: dict = Depends(require_role("admin"))):
+    # Aggregate expenses grouped by event_id
+    pipeline = [
+        {"$group": {
+            "_id": "$event_id",
+            "total_planned": {"$sum": "$planned_amount"},
+            "total_actual": {"$sum": "$actual_amount"},
+            "count": {"$sum": 1}
+        }}
+    ]
+    results = await db.budget_items.aggregate(pipeline).to_list(100)
+
+    # Get event names for lookup
+    events = await db.events.find({}, {"_id": 1, "name": 1}).to_list(500)
+    event_map = {str(e["_id"]): e["name"] for e in events}
+
+    summary = []
+    for r in results:
+        event_id = r["_id"]
+        summary.append({
+            "event_id": event_id,
+            "event_name": event_map.get(event_id, "Unlinked") if event_id else "Unlinked",
+            "total_planned": r["total_planned"],
+            "total_actual": r["total_actual"],
+            "item_count": r["count"]
+        })
+
+    # Sort: linked events first, then unlinked
+    summary.sort(key=lambda x: (x["event_id"] is None, x["event_name"]))
+    return summary
+
 
 # ─── EVENT/ITINERARY ROUTES ───
 @api_router.post("/events")

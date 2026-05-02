@@ -14,6 +14,7 @@ export default function BudgetScreen() {
   const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
+  const [byEvent, setByEvent] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -25,13 +26,26 @@ export default function BudgetScreen() {
       ]);
       setData(budgetRes);
       setEvents(eventsRes);
+
+      // Admin-only endpoint — fetch separately and fail-safe
+      if (user?.role === 'admin') {
+        try {
+          const summaryRes = await api.get('/budget/by-event');
+          setByEvent(Array.isArray(summaryRes) ? summaryRes : []);
+        } catch (err) {
+          console.log('by-event summary unavailable', err);
+          setByEvent([]);
+        }
+      } else {
+        setByEvent([]);
+      }
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [user?.role]);
 
   useFocusEffect(
     useCallback(() => {
@@ -142,6 +156,34 @@ export default function BudgetScreen() {
           </View>
         )}
 
+        {/* By Event Summary (Admin only) */}
+        {!isSummaryOnly && byEvent.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>By Event</Text>
+            {byEvent.map((row: any, idx: number) => {
+              const displayName =
+                (row?.event_name && String(row.event_name).trim()) ||
+                (row?.event_id ? `Event ${String(row.event_id).slice(-4)}` : 'Unlinked');
+              const planned = row?.total_planned || 0;
+              const actual = row?.total_actual || 0;
+              const count = row?.item_count || 0;
+              return (
+                <View key={(row?.event_id || 'unlinked') + '-' + idx} style={styles.eventSummaryCard} testID={`budget-by-event-${idx}`}>
+                  <View style={styles.eventSummaryHeader}>
+                    <Ionicons name="calendar-outline" size={16} color={Colors.brand.maroon} />
+                    <Text style={styles.eventSummaryName} numberOfLines={1}>{displayName}</Text>
+                    <Text style={styles.eventSummaryCount}>{count} item{count === 1 ? '' : 's'}</Text>
+                  </View>
+                  <View style={styles.eventSummaryAmounts}>
+                    <Text style={styles.eventSummaryPlanned}>Planned: {formatCurrency(planned)}</Text>
+                    <Text style={styles.eventSummaryActual}>Spent: {formatCurrency(actual)}</Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        )}
+
         {/* Line Items (for Admins) */}
         {!isSummaryOnly && data?.items?.length > 0 && (
           <View style={styles.section}>
@@ -239,6 +281,20 @@ const styles = StyleSheet.create({
   catAmounts: { flexDirection: 'row', justifyContent: 'space-between' },
   catPlanned: { fontSize: FontSizes.sm, color: Colors.text.secondary },
   catActual: { fontSize: FontSizes.sm, color: Colors.ui.error, fontWeight: '600' },
+  eventSummaryCard: {
+    backgroundColor: Colors.background.card, padding: Spacing.lg,
+    borderRadius: BorderRadius.lg, marginBottom: Spacing.sm,
+    borderWidth: 1, borderColor: Colors.ui.border,
+  },
+  eventSummaryHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
+    marginBottom: Spacing.sm,
+  },
+  eventSummaryName: { flex: 1, fontSize: FontSizes.md, fontWeight: '700', color: Colors.text.primary },
+  eventSummaryCount: { fontSize: FontSizes.xs, color: Colors.text.secondary, fontWeight: '500' },
+  eventSummaryAmounts: { flexDirection: 'row', justifyContent: 'space-between' },
+  eventSummaryPlanned: { fontSize: FontSizes.sm, color: Colors.text.secondary },
+  eventSummaryActual: { fontSize: FontSizes.sm, color: Colors.ui.error, fontWeight: '600' },
   itemCard: {
     backgroundColor: Colors.background.card, padding: Spacing.lg,
     borderRadius: BorderRadius.lg, marginBottom: Spacing.sm,
