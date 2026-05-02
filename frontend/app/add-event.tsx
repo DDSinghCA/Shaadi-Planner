@@ -21,6 +21,7 @@ export default function AddEventScreen() {
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
   const [transportNotes, setTransportNotes] = useState('');
+  const [mapsLink, setMapsLink] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEdit);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -36,6 +37,7 @@ export default function AddEventScreen() {
           setLocation(event.location || '');
           setNotes(event.notes || '');
           setTransportNotes(event.transport_notes || '');
+          setMapsLink(event.maps_link || '');
         }
         setFetching(false);
       }).catch(() => setFetching(false));
@@ -62,6 +64,7 @@ export default function AddEventScreen() {
         name: name.trim(), date: date,
         time: time || null, location: location || null,
         notes: notes || null, transport_notes: transportNotes || null,
+        maps_link: mapsLink || null,
       };
       if (isEdit && params.eventId) {
         await api.put(`/events/${params.eventId}`, payload);
@@ -153,7 +156,21 @@ export default function AddEventScreen() {
                 value={location}
                 onChangeText={setLocation}
               />
-              <Text style={styles.hint}>Tip: Enter a full address for Google Maps link in itinerary</Text>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Google Maps Link (Optional)</Text>
+              <TextInput
+                testID="event-maps-link-input"
+                style={styles.input}
+                placeholder="Paste Google Maps URL here"
+                placeholderTextColor="#999"
+                value={mapsLink}
+                onChangeText={setMapsLink}
+                autoCapitalize="none"
+                keyboardType="url"
+              />
+              <Text style={styles.hint}>If provided, tapping location in itinerary opens this link directly</Text>
             </View>
 
             <View style={styles.inputGroup}>

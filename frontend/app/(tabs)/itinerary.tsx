@@ -51,8 +51,8 @@ export default function ItineraryScreen() {
     ]);
   };
 
-  const handleLocationPress = (location: string) => {
-    const url = openGoogleMaps(location);
+  const handleLocationPress = (event: any) => {
+    const url = event.maps_link || openGoogleMaps(event.location);
     Linking.openURL(url).catch(() => {
       Alert.alert('Error', 'Could not open Google Maps');
     });
@@ -143,7 +143,7 @@ export default function ItineraryScreen() {
                       <TouchableOpacity
                         testID={`event-location-${idx}`}
                         style={styles.locationRow}
-                        onPress={() => handleLocationPress(event.location)}
+                        onPress={() => handleLocationPress(event)}
                       >
                         <Ionicons name="location" size={16} color={Colors.brand.gold} />
                         <Text style={[styles.locationText, past && styles.pastText]}>{event.location}</Text>

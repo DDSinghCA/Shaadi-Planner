@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 const SIDES = ['bride', 'groom'];
 const GROUPS = ['family', 'friends', 'vip'];
 const STATUSES = ['invited', 'confirmed', 'declined'];
+const ROOM_TYPES = ['none', 'single', 'double', 'triple', 'others'];
 
 const STATUS_CONFIG: Record<string, { color: string; icon: string }> = {
   invited: { color: Colors.brand.gold, icon: 'mail-outline' },
@@ -29,7 +30,8 @@ export default function AddGuestScreen() {
   const [phone, setPhone] = useState('');
   const [notes, setNotes] = useState('');
   const [status, setStatus] = useState<string | null>(null);
-  const [roomRequired, setRoomRequired] = useState(false);
+  const [guestCount, setGuestCount] = useState('1');
+  const [roomType, setRoomType] = useState('none');
   const [eventIds, setEventIds] = useState<string[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -50,7 +52,8 @@ export default function AddGuestScreen() {
           setPhone(guest.phone || '');
           setNotes(guest.notes || '');
           setStatus(guest.status || null);
-          setRoomRequired(guest.room_required || false);
+          setGuestCount(String(guest.guest_count ?? 1));
+          setRoomType(guest.room_type || 'none');
           setEventIds(guest.event_ids || []);
         }
         setFetching(false);
@@ -71,6 +74,11 @@ export default function AddGuestScreen() {
       Alert.alert('Required', 'Please enter the guest name');
       return;
     }
+    const count = parseInt(guestCount, 10);
+    if (isNaN(count) || count < 1) {
+      Alert.alert('Invalid', 'Guest count must be at least 1');
+      return;
+    }
     setLoading(true);
     try {
       const payload: any = {
@@ -80,7 +88,8 @@ export default function AddGuestScreen() {
         phone: phone || null,
         notes: notes || null,
         status: status || null,
-        room_required: roomRequired,
+        guest_count: count,
+        room_type: roomType,
         event_ids: eventIds,
       };
       if (isEdit && params.guestId) {
@@ -122,11 +131,47 @@ export default function AddGuestScreen() {
               <TextInput
                 testID="guest-name-input"
                 style={styles.input}
-                placeholder="Full name"
+                placeholder="Full name or family name"
                 placeholderTextColor="#999"
                 value={name}
                 onChangeText={setName}
               />
+            </View>
+
+            {/* Guest Count */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Number of Guests</Text>
+              <Text style={styles.hint}>For families or groups, enter total headcount</Text>
+              <View style={styles.counterRow}>
+                <TouchableOpacity
+                  testID="guest-count-minus"
+                  style={styles.counterBtn}
+                  onPress={() => {
+                    const v = Math.max(1, parseInt(guestCount, 10) - 1);
+                    setGuestCount(String(isNaN(v) ? 1 : v));
+                  }}
+                >
+                  <Ionicons name="remove" size={20} color={Colors.brand.maroon} />
+                </TouchableOpacity>
+                <TextInput
+                  testID="guest-count-input"
+                  style={styles.counterInput}
+                  value={guestCount}
+                  onChangeText={setGuestCount}
+                  keyboardType="number-pad"
+                  textAlign="center"
+                />
+                <TouchableOpacity
+                  testID="guest-count-plus"
+                  style={styles.counterBtn}
+                  onPress={() => {
+                    const v = parseInt(guestCount, 10) + 1;
+                    setGuestCount(String(isNaN(v) ? 2 : v));
+                  }}
+                >
+                  <Ionicons name="add" size={20} color={Colors.brand.maroon} />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <View style={styles.inputGroup}>
@@ -189,19 +234,30 @@ export default function AddGuestScreen() {
               </View>
             </View>
 
-            {/* Room Required */}
-            <View style={styles.switchRow}>
-              <View>
-                <Text style={styles.label}>Room Required</Text>
-                <Text style={styles.hint}>Does this guest need accommodation?</Text>
+            {/* Room Type */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Room Requirement</Text>
+              <View style={styles.chipRowWrap}>
+                {ROOM_TYPES.map(rt => {
+                  const isActive = roomType === rt;
+                  const displayLabel = rt === 'none' ? 'None' : rt.charAt(0).toUpperCase() + rt.slice(1);
+                  return (
+                    <TouchableOpacity
+                      key={rt}
+                      testID={`room-type-${rt}`}
+                      style={[styles.roomChip, isActive && styles.roomChipActive]}
+                      onPress={() => setRoomType(rt)}
+                    >
+                      {rt !== 'none' && (
+                        <Ionicons name="bed-outline" size={14} color={isActive ? Colors.brand.maroon : Colors.text.secondary} />
+                      )}
+                      <Text style={[styles.roomChipText, isActive && styles.roomChipTextActive]}>
+                        {displayLabel}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
-              <Switch
-                testID="room-required-switch"
-                value={roomRequired}
-                onValueChange={setRoomRequired}
-                trackColor={{ false: Colors.ui.border, true: Colors.brand.maroon + '50' }}
-                thumbColor={roomRequired ? Colors.brand.maroon : '#f4f3f4'}
-              />
             </View>
 
             {/* Event Tagging */}
@@ -302,7 +358,21 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.md, color: Colors.text.primary,
   },
   textArea: { height: 100, paddingTop: Spacing.md },
+  counterRow: {
+    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
+  },
+  counterBtn: {
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: Colors.brand.maroon + '12', justifyContent: 'center', alignItems: 'center',
+    borderWidth: 1, borderColor: Colors.brand.maroon + '30',
+  },
+  counterInput: {
+    width: 60, height: 48, backgroundColor: Colors.background.card,
+    borderWidth: 1, borderColor: Colors.ui.border, borderRadius: BorderRadius.lg,
+    fontSize: FontSizes.xl, fontWeight: '700', color: Colors.text.primary,
+  },
   chipRow: { flexDirection: 'row', gap: Spacing.sm },
+  chipRowWrap: { flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' },
   chip: {
     flex: 1, paddingVertical: Spacing.md, alignItems: 'center',
     borderRadius: BorderRadius.lg, backgroundColor: Colors.background.secondary,
@@ -317,11 +387,15 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background.secondary, borderWidth: 1, borderColor: 'transparent',
   },
   statusChipText: { fontSize: FontSizes.sm, color: Colors.text.secondary },
-  switchRow: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    backgroundColor: Colors.background.card, padding: Spacing.lg,
-    borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: Colors.ui.border,
+  roomChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full, backgroundColor: Colors.background.secondary,
+    borderWidth: 1, borderColor: 'transparent',
   },
+  roomChipActive: { backgroundColor: Colors.brand.maroon + '15', borderColor: Colors.brand.maroon },
+  roomChipText: { fontSize: FontSizes.sm, color: Colors.text.secondary },
+  roomChipTextActive: { color: Colors.brand.maroon, fontWeight: '700' },
   eventTag: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
     backgroundColor: Colors.background.card, padding: Spacing.md,

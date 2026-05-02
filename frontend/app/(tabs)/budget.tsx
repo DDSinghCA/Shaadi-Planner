@@ -13,13 +13,18 @@ export default function BudgetScreen() {
   const { user } = useAuth();
   const router = useRouter();
   const [data, setData] = useState<any>(null);
+  const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchBudget = useCallback(async () => {
     try {
-      const res = await api.get('/budget');
-      setData(res);
+      const [budgetRes, eventsRes] = await Promise.all([
+        api.get('/budget'),
+        api.get('/events'),
+      ]);
+      setData(budgetRes);
+      setEvents(eventsRes);
     } catch (e) {
       console.error(e);
     } finally {
@@ -51,6 +56,12 @@ export default function BudgetScreen() {
   };
 
   const formatCurrency = (amt: number) => '\u20B9' + (amt || 0).toLocaleString('en-IN');
+
+  const getEventName = (eventId: string | null | undefined) => {
+    if (!eventId) return null;
+    const ev = events.find((e: any) => e.id === eventId);
+    return ev?.name || null;
+  };
 
   if (loading) {
     return (
@@ -149,6 +160,12 @@ export default function BudgetScreen() {
                   <View style={styles.itemInfo}>
                     <Text style={styles.itemCategory}>{item.category}</Text>
                     {item.description && <Text style={styles.itemDesc} numberOfLines={1}>{item.description}</Text>}
+                    {getEventName(item.event_id) && (
+                      <View style={styles.eventBadge}>
+                        <Ionicons name="calendar-outline" size={12} color={Colors.brand.maroon} />
+                        <Text style={styles.eventBadgeText}>{getEventName(item.event_id)}</Text>
+                      </View>
+                    )}
                   </View>
                 </View>
                 <View style={styles.itemRight}>
@@ -237,6 +254,13 @@ const styles = StyleSheet.create({
   itemInfo: { flex: 1 },
   itemCategory: { fontSize: FontSizes.md, fontWeight: '600', color: Colors.text.primary },
   itemDesc: { fontSize: FontSizes.sm, color: Colors.text.secondary, marginTop: 2 },
+  eventBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    marginTop: 4, backgroundColor: Colors.brand.maroon + '10',
+    paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: BorderRadius.sm,
+    alignSelf: 'flex-start',
+  },
+  eventBadgeText: { fontSize: FontSizes.xs, color: Colors.brand.maroon, fontWeight: '600' },
   itemRight: { alignItems: 'flex-end', marginRight: Spacing.sm },
   itemPlanned: { fontSize: FontSizes.sm, color: Colors.text.secondary },
   itemActual: { fontSize: FontSizes.md, fontWeight: '700', color: Colors.text.primary },
