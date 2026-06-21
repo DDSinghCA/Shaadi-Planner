@@ -16,7 +16,8 @@
       },
       "env": {
         "EXPO_PUBLIC_BACKEND_URL": "https://shaadi-planner.onrender.com"
-      }
+      },
+      "channel": "development"
     },
     "preview": {
       "distribution": "internal",
