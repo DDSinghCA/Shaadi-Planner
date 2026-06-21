@@ -51,12 +51,15 @@ export default function ItineraryScreen() {
     ]);
   };
 
-  const handleLocationPress = (location: string) => {
-    const url = openGoogleMaps(location);
-    Linking.openURL(url).catch(() => {
+const handleLocationPress = (event: any) => {
+  if (event.maps_link && event.maps_link.trim() !== '') {
+    Linking.openURL(event.maps_link).catch(() => {
       Alert.alert('Error', 'Could not open Google Maps');
     });
-  };
+  } else {
+    Alert.alert('No location link available');
+  }
+}
 
   const isPast = (date: string) => {
     return new Date(date + 'T23:59:59') < new Date();
@@ -143,13 +146,19 @@ export default function ItineraryScreen() {
                       <TouchableOpacity
                         testID={`event-location-${idx}`}
                         style={styles.locationRow}
-                        onPress={() => handleLocationPress(event.location)}
+                        onPress={() => handleLocationPress(event)}
                       >
                         <Ionicons name="location" size={16} color={Colors.brand.gold} />
                         <Text style={[styles.locationText, past && styles.pastText]}>{event.location}</Text>
                         <Ionicons name="open-outline" size={14} color={Colors.brand.maroon} />
                       </TouchableOpacity>
                     )}
+                    {event.city ? (
+                      <View style={styles.cityRow} testID={`event-city-${idx}`}>
+                        <Ionicons name="business-outline" size={14} color={past ? Colors.text.secondary : Colors.brand.maroon} />
+                        <Text style={[styles.cityText, past && styles.pastText]}>{event.city}</Text>
+                      </View>
+                    ) : null}
                     {event.notes && (
                       <Text style={[styles.notes, past && styles.pastText]}>{event.notes}</Text>
                     )}
@@ -234,6 +243,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.brand.goldMuted + '60', borderRadius: BorderRadius.sm,
   },
   locationText: { flex: 1, fontSize: FontSizes.sm, color: Colors.brand.maroon, fontWeight: '500' },
+  cityRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, marginBottom: 4, marginTop: 2 },
+  cityText: { fontSize: FontSizes.sm, color: Colors.text.primary, fontWeight: '500' },
   notes: { fontSize: FontSizes.sm, color: Colors.text.secondary, marginTop: Spacing.sm, fontStyle: 'italic' },
   transportBox: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,

@@ -174,6 +174,22 @@ export default function GuestsScreen() {
                           <Text style={[styles.tagText, { color: Colors.brand.gold, marginLeft: 2 }]}>Room</Text>
                         </View>
                       )}
+                      {guest.room_type && guest.room_type !== 'none' && (
+                        <View style={[styles.tag, { backgroundColor: Colors.brand.goldMuted }]}>
+                          <Ionicons name="bed-outline" size={12} color={Colors.brand.gold} />
+                          <Text style={[styles.tagText, { color: Colors.brand.gold, marginLeft: 2 }]}>
+                            {guest.room_type.charAt(0).toUpperCase() + guest.room_type.slice(1)}
+                          </Text>
+                        </View>
+                      )}
+                      {(guest.guest_count ?? 1) > 1 && (
+                        <View style={[styles.tag, { backgroundColor: Colors.ui.success + '18' }]}>
+                          <Ionicons name="people-outline" size={12} color={Colors.ui.success} />
+                          <Text style={[styles.tagText, { color: Colors.ui.success, marginLeft: 2 }]}>
+                            {guest.guest_count}
+                          </Text>
+                        </View>
+                      )}
                     </View>
                   </View>
                   {user?.role === 'admin' && (

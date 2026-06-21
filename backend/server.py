@@ -130,6 +130,8 @@ class GuestCreate(BaseModel):
     status: Optional[str] = None
     room_required: Optional[bool] = None
     event_ids: Optional[List[str]] = None
+    guest_count: Optional[int] = None
+    room_type: Optional[str] = None
 
 class GuestUpdate(BaseModel):
     name: Optional[str] = None
@@ -141,18 +143,22 @@ class GuestUpdate(BaseModel):
     status: Optional[str] = None
     room_required: Optional[bool] = None
     event_ids: Optional[List[str]] = None
+    guest_count: Optional[int] = None
+    room_type: Optional[str] = None
 
 class BudgetItemCreate(BaseModel):
     category: str
     description: Optional[str] = None
     planned_amount: float = 0
     actual_amount: float = 0
+    event_id: Optional[str] = None
 
 class BudgetItemUpdate(BaseModel):
     category: Optional[str] = None
     description: Optional[str] = None
     planned_amount: Optional[float] = None
     actual_amount: Optional[float] = None
+    event_id: Optional[str] = None
 
 class EventCreate(BaseModel):
     name: str
@@ -161,6 +167,8 @@ class EventCreate(BaseModel):
     location: Optional[str] = None
     notes: Optional[str] = None
     transport_notes: Optional[str] = None
+    maps_link: Optional[str] = None
+    city: Optional[str] = None
 
 class EventUpdate(BaseModel):
     name: Optional[str] = None
@@ -169,6 +177,8 @@ class EventUpdate(BaseModel):
     location: Optional[str] = None
     notes: Optional[str] = None
     transport_notes: Optional[str] = None
+    maps_link: Optional[str] = None
+    city: Optional[str] = None
 
 # ─── Helper: serialize doc ───
 def serialize_doc(doc):
@@ -499,6 +509,40 @@ async def delete_budget_item(item_id: str, user: dict = Depends(require_role("ad
         raise HTTPException(status_code=404, detail="Budget item not found")
     return {"message": "Budget item deleted"}
 
+# ─── BUDGET SUMMARY BY EVENT ───
+@api_router.get("/budget/by-event")
+async def get_budget_by_event(user: dict = Depends(require_role("admin"))):
+    # Aggregate expenses grouped by event_id
+    pipeline = [
+        {"$group": {
+            "_id": "$event_id",
+            "total_planned": {"$sum": "$planned_amount"},
+            "total_actual": {"$sum": "$actual_amount"},
+            "count": {"$sum": 1}
+        }}
+    ]
+    results = await db.budget_items.aggregate(pipeline).to_list(100)
+
+    # Get event names for lookup
+    events = await db.events.find({}, {"_id": 1, "name": 1}).to_list(500)
+    event_map = {str(e["_id"]): e["name"] for e in events}
+
+    summary = []
+    for r in results:
+        event_id = r["_id"]
+        summary.append({
+            "event_id": event_id,
+            "event_name": event_map.get(event_id, "Unlinked") if event_id else "Unlinked",
+            "total_planned": r["total_planned"],
+            "total_actual": r["total_actual"],
+            "item_count": r["count"]
+        })
+
+    # Sort: linked events first, then unlinked
+    summary.sort(key=lambda x: (x["event_id"] is None, x["event_name"]))
+    return summary
+
+
 # ─── EVENT/ITINERARY ROUTES ───
 @api_router.post("/events")
 async def create_event(req: EventCreate, user: dict = Depends(require_role("admin"))):
@@ -556,14 +600,20 @@ async def get_dashboard(user: dict = Depends(get_current_user)):
         if result:
             budget_summary = {"total_planned": result[0]["planned"], "total_actual": result[0]["actual"]}
 
-    # Guest count
-    guest_count = await db.guests.count_documents({})
+    # Guest count - both entries and total headcount
+    guest_entries = await db.guests.count_documents({})
+    headcount_pipeline = [
+        {"$group": {"_id": None, "total": {"$sum": {"$ifNull": ["$guest_count", 1]}}}}
+    ]
+    headcount_result = await db.guests.aggregate(headcount_pipeline).to_list(1)
+    guest_headcount = headcount_result[0]["total"] if headcount_result else 0
 
     return {
         "my_tasks": [serialize_doc(t) for t in my_tasks],
         "upcoming_events": [serialize_doc(e) for e in events],
         "budget_summary": budget_summary,
-        "guest_count": guest_count
+        "guest_count": guest_entries,
+        "guest_headcount": guest_headcount
     }
 
 # ─── HEALTH ───

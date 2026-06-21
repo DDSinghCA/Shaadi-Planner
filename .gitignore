@@ -75,6 +75,7 @@ agenthub/agents/youtube/db
 
 # Build caches
 .cache/
+frontend/.metro-cache/
 
 memory/test_credentials.md
 
@@ -91,6 +92,15 @@ android-sdk/-e
 # Environment files
 *.env
 *.env.*
+-e 
+# Environment and credential files
+.env
+.env.*
+*.env
+credentials.json
+*.pem
+*.key
+.credentials
 -e 
 # Environment and credential files
 .env

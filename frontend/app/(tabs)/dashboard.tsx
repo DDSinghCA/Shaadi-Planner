@@ -101,8 +101,8 @@ export default function DashboardScreen() {
             <Text style={styles.statLabel}>Upcoming Events</Text>
           </View>
           <View style={[styles.statCard, { borderLeftColor: Colors.ui.success }]}>
-            <Text style={styles.statNumber}>{data?.guest_count || 0}</Text>
-            <Text style={styles.statLabel}>Total Guests</Text>
+            <Text style={styles.statNumber}>{data?.guest_headcount || data?.guest_count || 0}</Text>
+            <Text style={styles.statLabel}>Total Headcount</Text>
           </View>
         </View>
 

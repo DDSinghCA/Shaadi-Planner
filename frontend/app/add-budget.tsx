@@ -17,8 +17,14 @@ export default function AddBudgetScreen() {
   const [description, setDescription] = useState('');
   const [planned, setPlanned] = useState('');
   const [actual, setActual] = useState('');
+  const [eventId, setEventId] = useState<string | null>(null);
+  const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEdit);
+
+  useEffect(() => {
+    api.get('/events').then(setEvents).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (isEdit && params.itemId) {
@@ -29,6 +35,7 @@ export default function AddBudgetScreen() {
           setDescription(item.description || '');
           setPlanned(item.planned_amount?.toString() || '');
           setActual(item.actual_amount?.toString() || '');
+          setEventId(item.event_id || null);
         }
         setFetching(false);
       }).catch(() => setFetching(false));
@@ -47,6 +54,7 @@ export default function AddBudgetScreen() {
         description: description || null,
         planned_amount: parseFloat(planned) || 0,
         actual_amount: parseFloat(actual) || 0,
+        event_id: eventId || null,
       };
       if (isEdit && params.itemId) {
         await api.put(`/budget/${params.itemId}`, payload);
@@ -105,6 +113,34 @@ export default function AddBudgetScreen() {
                 onChangeText={setDescription}
               />
             </View>
+
+            {/* Event Linking */}
+            {events.length > 0 && (
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Linked Event (Optional)</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <TouchableOpacity
+                    testID="budget-event-none"
+                    style={[styles.eventChip, !eventId && styles.eventChipActive]}
+                    onPress={() => setEventId(null)}
+                  >
+                    <Text style={[styles.eventChipText, !eventId && styles.eventChipTextActive]}>None</Text>
+                  </TouchableOpacity>
+                  {events.map((ev: any) => (
+                    <TouchableOpacity
+                      key={ev.id}
+                      testID={`budget-event-${ev.id}`}
+                      style={[styles.eventChip, eventId === ev.id && styles.eventChipActive]}
+                      onPress={() => setEventId(ev.id)}
+                    >
+                      <Text style={[styles.eventChipText, eventId === ev.id && styles.eventChipTextActive]}>
+                        {ev.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
 
             <View style={styles.row}>
               <View style={[styles.inputGroup, { flex: 1 }]}>
@@ -172,6 +208,14 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.md, color: Colors.text.primary,
   },
   row: { flexDirection: 'row', gap: Spacing.md },
+  eventChip: {
+    paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full, backgroundColor: Colors.background.secondary,
+    marginRight: Spacing.sm, borderWidth: 1, borderColor: 'transparent',
+  },
+  eventChipActive: { backgroundColor: Colors.brand.maroon + '15', borderColor: Colors.brand.maroon },
+  eventChipText: { fontSize: FontSizes.sm, color: Colors.text.secondary },
+  eventChipTextActive: { color: Colors.brand.maroon, fontWeight: '600' },
   saveBtn: {
     backgroundColor: Colors.brand.maroon, height: 56,
     borderRadius: BorderRadius.full, justifyContent: 'center', alignItems: 'center', marginTop: Spacing.md,
