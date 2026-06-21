@@ -2,7 +2,7 @@
   "expo": {
     "name": "Shaadi Planner",
     "slug": "shaadi-planner",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "shaadiplanner",
@@ -21,7 +21,7 @@
     },
     "android": {
       "package": "com.caddsingh.shaadiplanner",
-      "versionCode": 1,
+      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#7A1A2A"
