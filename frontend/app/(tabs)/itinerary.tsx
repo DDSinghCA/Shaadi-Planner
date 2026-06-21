@@ -51,12 +51,15 @@ export default function ItineraryScreen() {
     ]);
   };
 
-  const handleLocationPress = (event: any) => {
-    const url = event.maps_link || openGoogleMaps(event.location);
-    Linking.openURL(url).catch(() => {
+const handleLocationPress = (event: any) => {
+  if (event.maps_link && event.maps_link.trim() !== '') {
+    Linking.openURL(event.maps_link).catch(() => {
       Alert.alert('Error', 'Could not open Google Maps');
     });
-  };
+  } else {
+    Alert.alert('No location link available');
+  }
+}
 
   const isPast = (date: string) => {
     return new Date(date + 'T23:59:59') < new Date();

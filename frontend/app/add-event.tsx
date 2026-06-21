@@ -32,6 +32,7 @@ export default function AddEventScreen() {
       api.get('/events').then((events) => {
         const event = events.find((e: any) => e.id === params.eventId);
         if (event) {
+	  console.log("EVENT DATA:", event);
           setName(event.name || '');
           setDate(event.date || '');
           setTime(event.time || '');
@@ -66,9 +67,10 @@ export default function AddEventScreen() {
         name: name.trim(), date: date,
         time: time || null, location: location || null,
         notes: notes || null, transport_notes: transportNotes || null,
-        maps_link: mapsLink || null, city: city || null,
+        maps_link: mapsLink?.trim() ? mapsLink : undefined, city: city?.trim() ? city : undefined,
       };
       if (isEdit && params.eventId) {
+        console.log("PAYLOAD SENT:", payload);
         await api.put(`/events/${params.eventId}`, payload);
       } else {
         await api.post('/events', payload);
@@ -159,6 +161,18 @@ export default function AddEventScreen() {
                 onChangeText={setLocation}
               />
             </View>
+
+	    <View style={styles.inputGroup}>
+  	       <Text style={styles.label}>City</Text>
+   	       <TextInput
+                 testID="event-city-input"
+                 style={styles.input}
+                 placeholder="Enter city"
+                 placeholderTextColor="#999"
+                 value={city}
+                 onChangeText={setCity}
+               />
+             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Google Maps Link (Optional)</Text>
